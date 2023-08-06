@@ -20,7 +20,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="p-8 h-screen">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
