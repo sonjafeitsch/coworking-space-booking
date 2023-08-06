@@ -1,5 +1,10 @@
 import { json, LoaderArgs, type V2_MetaFunction } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import {
+  Form,
+  useLoaderData,
+  useNavigation,
+  useSearchParams,
+} from "@remix-run/react";
 import { getEvents } from "~/models/events";
 
 export const meta: V2_MetaFunction = () => {
@@ -10,7 +15,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
   const start = url.searchParams.get("start");
   const end = url.searchParams.get("end");
-  if (!start && !end) {
+  if (!start || !end) {
     return json({ events: [] });
   }
   const events = await getEvents(start, end);
@@ -19,12 +24,13 @@ export const loader = async ({ request }: LoaderArgs) => {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
-  console.log(data);
   const [params] = useSearchParams();
+  const { state } = useNavigation();
+
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.8" }}>
       <h1>Meine Buchung</h1>
-      <form>
+      <Form>
         <label htmlFor="start">Von</label>
         <input
           id="start"
@@ -39,8 +45,12 @@ export default function Index() {
           type="datetime-local"
           defaultValue={params.get("end") ?? ""}
         />
-        <button>Suchen</button>
-      </form>
+        <button type="submit">
+          {state === "loading"
+            ? "Events werden gesucht…"
+            : "Verfügbarkeit prüfen"}
+        </button>
+      </Form>
       {data.events.length > 0 && (
         <div>{data.events.length} Events gefunden</div>
       )}

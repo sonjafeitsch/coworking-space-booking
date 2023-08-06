@@ -1,7 +1,6 @@
 import { createDAVClient } from "tsdav";
 
 export async function getEvents(start: string, end: string) {
-  console.log(start, end);
   const client = await createDAVClient({
     serverUrl: process.env.CALENDAR_URL ?? "",
     credentials: {
