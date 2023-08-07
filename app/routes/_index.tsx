@@ -6,6 +6,13 @@ import {
   useSearchParams,
 } from "@remix-run/react";
 import { getEvents } from "~/models/events";
+import dayjs from "dayjs";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import "dayjs/locale/de";
+import image from "../../public/assets/images/nische_ganz_800w.png";
+
+dayjs.extend(localizedFormat);
+dayjs.locale("de");
 
 export const meta: V2_MetaFunction = () => {
   return [{ title: "Meine Nische – Buchung" }];
@@ -28,7 +35,7 @@ export default function Index() {
   const data = useLoaderData<typeof loader>();
   const [params] = useSearchParams();
   const start = params.get("start") ?? "";
-  const end = params.get("start") ?? "";
+  const end = params.get("end") ?? "";
   const { state } = useNavigation();
 
   return (
@@ -74,7 +81,27 @@ export default function Index() {
             : "Verfügbarkeit prüfen"}
         </button>
       </Form>
-      <div>{data.events.length} Events gefunden</div>
+          {data.events.length > 0 ? (
+            <>
+              <div className="font-semibold">
+                Leider belegt. Folgende parallele Veranstaltungen wurden
+                gefunden:
+              </div>
+              <ul>
+                {data.events.map((event, i) => (
+                  <li key={i}>
+                    {dayjs(event.start).format("LLL")} –{" "}
+                    {dayjs(event.end).format("LT")}: {event.summary}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : start && end ? (
+            <div className="font-semibold">Juhu, die Nische ist frei!</div>
+          ) : (
+            <></>
+          )}
+        </div>
     </div>
   );
 }
