@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: "SourceSansPro";
+    src: url("../public/assets/fonts/SourceSansPro-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "PlayfairDisplay";
+    src: url("../public/assets/fonts/PlayfairDisplay_wght.ttf") format("truetype");
+    font-weight: 800;
+}
+  
+@font-face {
+    font-family: "PlayfairDisplay Light";
+    src: url("../public/assets/fonts/PlayfairDisplay_wght.ttf") format("truetype");
+    font-weight: 400;
+}

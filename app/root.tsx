@@ -20,7 +20,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="p-8 h-screen">
+      <body className="h-screen bg-meine-nische-background font-sans text-themed-base-text">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
