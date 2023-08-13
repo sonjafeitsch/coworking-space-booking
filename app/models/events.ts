@@ -18,80 +18,84 @@ function getValue(rawData: string, key: string) {
   return value;
 }
 
-// export async function getEvents(start: string, end: string) {
-//   const client = await createDAVClient({
-//     serverUrl: process.env.CALENDAR_URL ?? "",
-//     credentials: {
-//       username: process.env.CALENDAR_USERNAME,
-//       password: process.env.CALENDAR_PASSWORD,
-//     },
-//     authMethod: "Basic",
-//     defaultAccountType: "caldav",
-//   });
+function getEventsFromResponse(rawData: string) {
+  let events: Event[] = [];
+  const jsonRawData = JSON.parse(rawData);
 
-//   const calendars = await client.fetchCalendars();
-//   const events = await client.fetchCalendarObjects({
-//     calendar: calendars[1],
-//     timeRange: {
-//       start: start + "+02:00",
-//       end: end + "+02:00",
-//     },
-//   });
-//   const formattedEvents: Event[] = events.map((event) => {
-//     return {
-//       start: getValue(event.data, "DTSTART;TZID=Europe/Berlin"),
-//       end: getValue(event.data, "DTEND;TZID=Europe/Berlin"),
-//       summary: getValue(event.data, "SUMMARY"),
-//     };
-//   });
-//   return formattedEvents;
-// }
+  if (jsonRawData["d:error"]) {
+    const errorMessage = jsonRawData["d:error"]["s:message"]["_text"];
+    throw new Error(errorMessage);
+  }
+
+  const response = jsonRawData["d:multistatus"]["d:response"];
+  if (!response) {
+    return events;
+  }
+  events = !Array.isArray(response)
+    ? [
+        {
+          start: getValue(
+            response["d:propstat"]["d:prop"]["cal:calendar-data"]["_text"],
+            "DTSTART;TZID=Europe/Berlin"
+          ),
+          end: getValue(
+            response["d:propstat"]["d:prop"]["cal:calendar-data"]["_text"],
+            "DTEND;TZID=Europe/Berlin"
+          ),
+          summary: getValue(
+            response["d:propstat"]["d:prop"]["cal:calendar-data"]["_text"],
+            "SUMMARY"
+          ),
+        },
+      ]
+    : response.map((rawEvent: any) => {
+        const calendarEvent =
+          rawEvent["d:propstat"]["d:prop"]["cal:calendar-data"]["_text"];
+        return {
+          start: getValue(calendarEvent, "DTSTART;TZID=Europe/Berlin"),
+          end: getValue(calendarEvent, "DTEND;TZID=Europe/Berlin"),
+          summary: getValue(calendarEvent, "SUMMARY"),
+        };
+      });
+
+  return events;
+}
 
 export async function getEvents(start: string, end: string) {
-  console.log(start, end);
-  const USERNAME = "briefe@sonja-feitsch.de";
-  const PASSWORD = "FeEpE7rgZMlnrtCCNnetFlI7bW0O8";
-  const CALENDAR_URL =
-    "https://fafeitsch.de/baikal/html/dav.php/calendars/briefe@sonja-feitsch.de/development";
-
   const xmlData = `<?xml version="1.0" encoding="utf-8" ?>
-<C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
-  <D:prop>
-    <D:getetag />
-    <C:calendar-data />
-  </D:prop>
-  <C:filter>
-    <C:comp-filter name="VCALENDAR">
-      <C:comp-filter name="VEVENT">
-        <C:time-range start="${start}" end="${end}"/>
-      </C:comp-filter>
-    </C:comp-filter>
-  </C:filter>
-</C:calendar-query>`;
+    <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
+      <D:prop>
+        <D:getetag />
+        <C:calendar-data />
+      </D:prop>
+      <C:filter>
+        <C:comp-filter name="VCALENDAR">
+          <C:comp-filter name="VEVENT">
+            <C:time-range start="${start}" end="${end}"/>
+          </C:comp-filter>
+        </C:comp-filter>
+      </C:filter>
+    </C:calendar-query>`;
 
-  await fetch(CALENDAR_URL, {
+  const result = await fetch(process.env.CALENDAR_URL ?? "", {
     method: "REPORT",
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
       Depth: "1",
-      Authorization: "Basic " + btoa(`${USERNAME}:${PASSWORD}`),
+      Authorization:
+        "Basic " +
+        btoa(
+          `${process.env.CALENDAR_USERNAME}:${process.env.CALENDAR_PASSWORD}`
+        ),
     },
     body: xmlData,
   })
     .then((response) => response.text())
     .then((data) => {
-      // const json = JSON.parse(xml2json(data, { compact: true }));
-      // console.log(
-      //   "json",
-      //   json["d:multistatus"]["d:response"]["d:propstat"]["d:prop"][
-      //     "cal:calendar-data"
-      //   ]["_text"]
-      // );
-      console.log(xml2json(data, { compact: true }));
+      return getEventsFromResponse(xml2json(data, { compact: true }));
     })
     .catch((error) => {
-      console.log("error", error);
+      throw new Error(error);
     });
-
-  return {};
+  return result;
 }

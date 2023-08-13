@@ -27,15 +27,42 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (!start || !end) {
     return json({ events: [] });
   }
-  const events = await getEvents(
-    dayjs(start).utc().format("YYYYMMDDTHHmmss"),
-    dayjs(end).utc().format("YYYYMMDDTHHmmss")
-  );
-  return json({ events });
+  try {
+    const events = await getEvents(
+      dayjs(start).utc().format("YYYYMMDDTHHmmss"),
+      dayjs(end).utc().format("YYYYMMDDTHHmmss")
+    );
+    return json({ events });
+  } catch (error) {
+    // throw error;
+  }
 };
 
-export default function Index() {
+function Events({ start, end }: { start: string; end: string }) {
   const data = useLoaderData<typeof loader>();
+
+  return data.events.length > 0 ? (
+    <>
+      <div className="font-semibold">
+        Leider belegt. Folgende parallele Veranstaltungen wurden gefunden:
+      </div>
+      <ul>
+        {data.events.map((event, i) => (
+          <li key={i}>
+            {dayjs(event.start).format("LLL")} – {dayjs(event.end).format("LT")}
+            : {event.summary}
+          </li>
+        ))}
+      </ul>
+    </>
+  ) : start && end ? (
+    <div className="font-semibold">Juhu, die Nische ist frei!</div>
+  ) : (
+    <></>
+  );
+}
+
+export default function Index() {
   const [params] = useSearchParams();
   const start = params.get("start") ?? "";
   const end = params.get("end") ?? "";
@@ -101,26 +128,7 @@ export default function Index() {
                 : "Verfügbarkeit prüfen"}
             </button>
           </Form>
-          {data.events.length > 0 ? (
-            <>
-              <div className="font-semibold">
-                Leider belegt. Folgende parallele Veranstaltungen wurden
-                gefunden:
-              </div>
-              <ul>
-                {data.events.map((event, i) => (
-                  <li key={i}>
-                    {dayjs(event.start).format("LLL")} –{" "}
-                    {dayjs(event.end).format("LT")}: {event.summary}
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : start && end ? (
-            <div className="font-semibold">Juhu, die Nische ist frei!</div>
-          ) : (
-            <></>
-          )}
+          <Events start={start} end={end} />
         </div>
       </div>
     </div>
