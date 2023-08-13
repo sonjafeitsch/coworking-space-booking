@@ -8,10 +8,12 @@ import {
 import { getEvents } from "~/models/events";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import utc from "dayjs/plugin/utc";
 import "dayjs/locale/de";
 import image from "../../public/assets/images/nische_ganz_800w.png";
 
 dayjs.extend(localizedFormat);
+dayjs.extend(utc);
 dayjs.locale("de");
 
 export const meta: V2_MetaFunction = () => {
@@ -22,11 +24,13 @@ export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
   const start = url.searchParams.get("start");
   const end = url.searchParams.get("end");
-  console.log(start, end);
   if (!start || !end) {
     return json({ events: [] });
   }
-  const events = await getEvents(start, end);
+  const events = await getEvents(
+    dayjs(start).utc().format("YYYYMMDDTHHmmss"),
+    dayjs(end).utc().format("YYYYMMDDTHHmmss")
+  );
   return json({ events });
 };
 
