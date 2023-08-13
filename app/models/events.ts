@@ -1,4 +1,3 @@
-import { createDAVClient } from "tsdav";
 import { xml2json } from "xml-js";
 
 type Event = {
