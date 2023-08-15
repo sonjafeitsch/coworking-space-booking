@@ -3,10 +3,14 @@ import type { InputHTMLAttributes } from "react";
 export function TextField({
   label,
   id,
+  className,
+  hidden,
   ...otherProps
-}: InputHTMLAttributes<HTMLInputElement> & { label?: string }) {
+}: InputHTMLAttributes<HTMLInputElement> & {
+  label?: string;
+}) {
   return (
-    <div>
+    <div className={className}>
       <label
         className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
         htmlFor={id}

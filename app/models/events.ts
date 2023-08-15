@@ -1,4 +1,12 @@
+import dayjs from "dayjs";
 import { xml2json } from "xml-js";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import utc from "dayjs/plugin/utc";
+import { v4 as uuidv4 } from "uuid";
+
+dayjs.extend(localizedFormat);
+dayjs.extend(utc);
+dayjs.locale("de");
 
 type Event = {
   start: string;
@@ -93,6 +101,47 @@ export async function getEvents(start: string, end: string) {
     .then((response) => response.text())
     .then((data) => {
       return getEventsFromResponse(xml2json(data, { compact: true }));
+    })
+    .catch((error) => {
+      throw new Error(error);
+    });
+  return result;
+}
+
+export async function createEvent(title: string, start: string, end: string) {
+  const uuid = uuidv4();
+
+  const xmlData = `
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VEVENT
+UID:${uuid}
+DTSTAMP:${dayjs().utc().format("YYYYMMDDTHHmmss")}
+DTSTART;TZID=Europe/Berlin:${dayjs(start).format("YYYYMMDDTHHmmss")}
+DTEND;TZID=Europe/Berlin:${dayjs(end).format("YYYYMMDDTHHmmss")}
+SUMMARY:${title}
+END:VEVENT
+END:VCALENDAR
+ `;
+
+  const result = await fetch(process.env.CALENDAR_URL + `${uuid}.ics` ?? "", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "text/calendar; charset=utf-8",
+      Expect: "",
+      Authorization:
+        "Basic " +
+        btoa(
+          `${process.env.CALENDAR_USERNAME}:${process.env.CALENDAR_PASSWORD}`
+        ),
+    },
+    body: xmlData,
+  })
+    .then((response) => response.text())
+    .then((data) => {
+      console.log("data", data);
+      // return getEventsFromResponse(xml2json(data, { compact: true }));
     })
     .catch((error) => {
       throw new Error(error);
