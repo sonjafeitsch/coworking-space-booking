@@ -9,6 +9,7 @@ import { getEvents } from "~/models/events";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import utc from "dayjs/plugin/utc";
+import { Button, Link, TextField } from "~/components";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(utc);
@@ -51,7 +52,10 @@ function Events({ start, end }: { start: string; end: string }) {
       </ul>
     </>
   ) : start && end ? (
-    <div className="font-semibold">Juhu, die Nische ist frei!</div>
+    <div className="flex flex-col gap-4 content-start">
+      <div className="font-semibold">Juhu, die Nische ist frei!</div>
+      <Link href={`/book?start=${start}&end=${end}`}>Buchen</Link>
+    </div>
   ) : (
     <></>
   );
@@ -77,45 +81,27 @@ export default function Index() {
         </div>
         <Form className="flex flex-col items-start gap-4">
           <div className="flex gap-4">
-            <div>
-              <label
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                htmlFor="start"
-              >
-                Von
-              </label>
-              <input
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                id="start"
-                name="start"
-                type="datetime-local"
-                defaultValue={start}
-              />
-            </div>
-            <div>
-              <label
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                htmlFor="end"
-              >
-                Bis
-              </label>
-              <input
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                id="end"
-                name="end"
-                type="datetime-local"
-                defaultValue={end}
-              />
-            </div>
+            <TextField
+              label="Von"
+              id="start"
+              name="start"
+              type="datetime-local"
+              defaultValue={start}
+            />
+            <TextField
+              label="Bis"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              id="end"
+              name="end"
+              type="datetime-local"
+              defaultValue={end}
+            />
           </div>
-          <button
-            className="border-bg-primary border text-white w-full bg-bg-primary hover:border-bg-primary hover:text-bg-primary hover:bg-white focus:ring-4 font-medium rounded-3xl text-sm px-5 py-2.5 mr-2 mb-2 focus:ring-transparent focus:outline-none"
-            type="submit"
-          >
+          <Button type="submit">
             {state === "loading"
               ? "Events werden gesucht…"
               : "Verfügbarkeit prüfen"}
-          </button>
+          </Button>
         </Form>
         <Events start={start} end={end} />
       </div>
