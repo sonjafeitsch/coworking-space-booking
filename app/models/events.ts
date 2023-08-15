@@ -109,6 +109,16 @@ export async function getEvents(start: string, end: string) {
 }
 
 export async function createEvent(title: string, start: string, end: string) {
+  const events = await getEvents(
+    dayjs(start).utc().format("YYYYMMDDTHHmmss"),
+    dayjs(end).utc().format("YYYYMMDDTHHmmss")
+  );
+  if (events.length > 0) {
+    throw new Error(
+      "Event konnte nicht angelegt werden, da schon ein anderes Event existiert."
+    );
+  }
+
   const uuid = uuidv4();
 
   const xmlData = `
@@ -138,10 +148,8 @@ END:VCALENDAR
     },
     body: xmlData,
   })
-    .then((response) => response.text())
-    .then((data) => {
-      console.log("data", data);
-      // return getEventsFromResponse(xml2json(data, { compact: true }));
+    .then((response) => {
+      return { message: "Event erstellt" };
     })
     .catch((error) => {
       throw new Error(error);

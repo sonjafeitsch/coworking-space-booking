@@ -22,7 +22,7 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof start === "string", "Startdatum muss ein Text sein.");
   invariant(typeof end === "string", "Enddatum muss ein Text sein.");
 
-  await createEvent(eventname, start, end);
+  const result = await createEvent(eventname, start, end);
 
   return redirect("/finished");
 };
