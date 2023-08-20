@@ -1,12 +1,15 @@
 import { redirect, type ActionArgs, json } from "@remix-run/node";
 import { Form, useSearchParams } from "@remix-run/react";
+import dayjs from "dayjs";
 import invariant from "tiny-invariant";
 import { Button, TextField } from "~/components";
 import { createEvent } from "~/models/events";
+import { createTicket, getUser } from "~/models/zammad";
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
   const eventname = formData.get("eventname");
+  const email = formData.get("email");
   const start = formData.get("start");
   const end = formData.get("end");
 
@@ -21,8 +24,19 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof eventname === "string", "Der Titel muss ein Text sein.");
   invariant(typeof start === "string", "Startdatum muss ein Text sein.");
   invariant(typeof end === "string", "Enddatum muss ein Text sein.");
+  invariant(typeof email === "string", "Email muss ein Text sein.");
 
-  const result = await createEvent(eventname, start, end);
+  const ticketBody =
+    "Buchung für " +
+    dayjs(start).format("LLL") +
+    " – " +
+    dayjs(end).format("LLL");
+
+  await createEvent(eventname, start, end);
+  const user = await getUser(email);
+  if (user.length > 0) {
+    await createTicket(user[0].email, eventname, ticketBody);
+  }
 
   return redirect("/finished");
 };
@@ -56,12 +70,6 @@ export default function Submit() {
             label="E-Mail"
             id="email"
             name="email"
-          />
-          <TextField
-            className="w-full"
-            label="Nachricht"
-            id="message"
-            name="message"
           />
           <Button type="submit">Buchen</Button>
         </Form>
