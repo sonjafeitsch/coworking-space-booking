@@ -57,38 +57,30 @@ export default function Submit() {
   const event = params.get("eventname") ?? "";
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <div className="flex flex-col justify-start w-1/2 gap-8">
-        <div className="lg:max-w-lg">
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-themed-text font-serif sm:text-4xl">
-            Reservierung bestätigen
-          </h1>
-          <p className="mt-6 text-base leading-6 text-themed-base-text">
-            Trage den Namen deiner Veranstaltung ein und hinterlasse optional
-            eine Nachricht an uns. Wichtig: diese Reservierung ist noch keine
-            finale Buchung. Wir bestätigen dir zeitnah deine Reservierung per
-            E-Mail.
-          </p>
-        </div>
-        <Form className="flex flex-col items-start gap-4" method="post">
-          <input className="hidden" name="start" defaultValue={start} />
-          <input className="hidden" name="end" defaultValue={end} />
-          <TextField
-            className="w-full"
-            label="Name der Veranstaltung"
-            id="eventname"
-            name="eventname"
-            defaultValue={event}
-          />
-          <TextField
-            className="w-full"
-            label="E-Mail"
-            id="email"
-            name="email"
-          />
-          <Button type="submit">Reservieren</Button>
-        </Form>
+    <div className="flex flex-col justify-start w-1/2 gap-8">
+      <div className="lg:max-w-lg">
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-themed-text font-serif sm:text-4xl">
+          Reservierung bestätigen
+        </h1>
+        <p className="mt-6 text-base leading-6 text-themed-base-text">
+          Trage den Namen deiner Veranstaltung ein und hinterlasse optional eine
+          Nachricht an uns. Wichtig: diese Reservierung ist noch keine finale
+          Buchung. Wir bestätigen dir zeitnah deine Reservierung per E-Mail.
+        </p>
       </div>
+      <Form className="flex flex-col items-start gap-4" method="post">
+        <input className="hidden" name="start" defaultValue={start} />
+        <input className="hidden" name="end" defaultValue={end} />
+        <TextField
+          className="w-full"
+          label="Name der Veranstaltung"
+          id="eventname"
+          name="eventname"
+          defaultValue={event}
+        />
+        <TextField className="w-full" label="E-Mail" id="email" name="email" />
+        <Button type="submit">Reservieren</Button>
+      </Form>
     </div>
   );
 }
@@ -112,11 +104,9 @@ export function ErrorBoundary() {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <div className="flex flex-col justify-start w-1/2 gap-2 text-red-500">
-        <span className="font-semibold">Es ist ein Fehler aufgetreten: </span>
-        {errorMessage}
-      </div>
+    <div className="flex flex-col justify-start w-1/2 gap-2 text-red-500">
+      <span className="font-semibold">Es ist ein Fehler aufgetreten: </span>
+      {errorMessage}
     </div>
   );
 }

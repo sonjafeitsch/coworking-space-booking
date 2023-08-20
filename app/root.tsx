@@ -32,7 +32,29 @@ export default function App() {
             src={image}
             className="hidden lg:block lg:object-cover lg:overflow-hidden lg:h-0 lg:w-0 lg:min-h-full lg:min-w-full"
           />
-          <Outlet />
+          <div className="flex flex-col justify-between items-center">
+            <div />
+            <Outlet />
+            <div className="py-4">
+              <a
+                className="underline hover:text-text-secondary"
+                href="https://meine-nische.de/kontakt#impressum"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Impressum
+              </a>{" "}
+              |{" "}
+              <a
+                className="underline hover:text-text-secondary"
+                href="https://meine-nische.de/kontakt#datenschutz"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Datenschutz
+              </a>
+            </div>
+          </div>
         </div>
         <ScrollRestoration />
         <Scripts />

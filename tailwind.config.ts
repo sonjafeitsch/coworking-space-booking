@@ -13,6 +13,7 @@ export default {
         "themed-text": "#a3b6a0",
         "themed-base-text": "#5e6860",
         "bg-primary": "#a3b6a0",
+        "text-secondary": "#c18d6e",
       },
     },
   },

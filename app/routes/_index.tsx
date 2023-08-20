@@ -68,42 +68,40 @@ export default function Index() {
   const { state } = useNavigation();
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <div className="flex flex-col justify-start w-1/2 gap-8">
-        <div className="lg:max-w-lg">
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-themed-text font-serif sm:text-4xl">
-            Meine Buchung
-          </h1>
-          <p className="mt-6 text-base leading-6 text-themed-base-text">
-            Gib den Wunschzeitraum für Deine Veranstaltung ein. Prüfe mit einem
-            Klick ob sie verfügbar ist.
-          </p>
-        </div>
-        <Form className="flex flex-col items-start gap-4">
-          <div className="flex gap-4">
-            <TextField
-              label="Von"
-              id="start"
-              name="start"
-              type="datetime-local"
-              defaultValue={start}
-            />
-            <TextField
-              label="Bis"
-              id="end"
-              name="end"
-              type="datetime-local"
-              defaultValue={end}
-            />
-          </div>
-          <Button type="submit">
-            {state === "loading"
-              ? "Events werden gesucht…"
-              : "Verfügbarkeit prüfen"}
-          </Button>
-        </Form>
-        <Events start={start} end={end} />
+    <div className="flex flex-col justify-start w-1/2 gap-8">
+      <div className="lg:max-w-lg">
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-themed-text font-serif sm:text-4xl">
+          Meine Buchung
+        </h1>
+        <p className="mt-6 text-base leading-6 text-themed-base-text">
+          Gib den Wunschzeitraum für Deine Veranstaltung ein. Prüfe mit einem
+          Klick ob sie verfügbar ist.
+        </p>
       </div>
+      <Form className="flex flex-col items-start gap-4">
+        <div className="flex gap-4">
+          <TextField
+            label="Von"
+            id="start"
+            name="start"
+            type="datetime-local"
+            defaultValue={start}
+          />
+          <TextField
+            label="Bis"
+            id="end"
+            name="end"
+            type="datetime-local"
+            defaultValue={end}
+          />
+        </div>
+        <Button type="submit">
+          {state === "loading"
+            ? "Events werden gesucht…"
+            : "Verfügbarkeit prüfen"}
+        </Button>
+      </Form>
+      <Events start={start} end={end} />
     </div>
   );
 }
@@ -127,11 +125,9 @@ export function ErrorBoundary() {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center">
-      <div className="flex flex-col justify-start w-1/2 gap-2 text-red-500">
-        <span className="font-semibold">Es ist ein Fehler aufgetreten: </span>
-        {errorMessage}
-      </div>
+    <div className="flex flex-col justify-start w-1/2 gap-2 text-red-500">
+      <span className="font-semibold">Es ist ein Fehler aufgetreten: </span>
+      {errorMessage}
     </div>
   );
 }
