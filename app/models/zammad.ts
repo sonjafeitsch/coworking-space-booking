@@ -49,19 +49,15 @@ export async function createTicket(
       Authorization: `Token token=${process.env.ZAMMAD_TOKEN}`,
     },
     body: JSON.stringify({
-      title: eventname,
+      title: "Test: " + eventname,
       group: "Users",
       customer: email,
       article: {
-        subject: eventname,
+        subject: "Test: " + eventname,
         body: message,
         type: "email",
         internal: false,
         to: email,
-        preferences: {
-          "send-auto-response": true,
-          "is-auto-response": false,
-        },
       },
     }),
   })
