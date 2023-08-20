@@ -70,6 +70,10 @@ function getEventsFromResponse(rawData: string) {
 }
 
 export async function getEvents(start: string, end: string) {
+  if (dayjs(start).isAfter(end)) {
+    throw new Error("Der Beginn darf nicht hinter dem Ende liegen.");
+  }
+
   const xmlData = `<?xml version="1.0" encoding="utf-8" ?>
     <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
       <D:prop>

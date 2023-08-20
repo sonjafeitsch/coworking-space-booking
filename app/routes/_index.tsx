@@ -1,8 +1,10 @@
 import { LoaderArgs, json } from "@remix-run/node";
 import {
   Form,
+  isRouteErrorResponse,
   useLoaderData,
   useNavigation,
+  useRouteError,
   useSearchParams,
 } from "@remix-run/react";
 import { getEvents } from "~/models/events";
@@ -22,21 +24,15 @@ export const loader = async ({ request }: LoaderArgs) => {
   if (!start || !end) {
     return json({ events: [] });
   }
-  try {
-    const events = await getEvents(
-      dayjs(start).utc().format("YYYYMMDDTHHmmss"),
-      dayjs(end).utc().format("YYYYMMDDTHHmmss")
-    );
-    return json({ events });
-  } catch (error) {
-    // throw error;
-    return json({ events: [] });
-  }
+  const events = await getEvents(
+    dayjs(start).utc().format("YYYYMMDDTHHmmss"),
+    dayjs(end).utc().format("YYYYMMDDTHHmmss")
+  );
+  return json({ events });
 };
 
 function Events({ start, end }: { start: string; end: string }) {
   const data = useLoaderData<typeof loader>();
-  console.log(data);
 
   return data.events.length > 0 ? (
     <>
@@ -54,8 +50,11 @@ function Events({ start, end }: { start: string; end: string }) {
     </>
   ) : start && end ? (
     <div className="flex flex-col gap-4 content-start">
-      <div className="font-semibold">Juhu, die Nische ist frei!</div>
-      <Link href={`/book?start=${start}&end=${end}`}>Buchen</Link>
+      <p className="text-base leading-6 text-themed-base-text">
+        Dein Wunschtermin ist verfügbar. Du kannst ihn jetzt in unserem
+        Buchungskalender reservieren.
+      </p>
+      <Link href={`/book?start=${start}&end=${end}`}>Jetzt reservieren</Link>
     </div>
   ) : (
     <></>
@@ -104,6 +103,34 @@ export default function Index() {
           </Button>
         </Form>
         <Events start={start} end={end} />
+      </div>
+    </div>
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div>
+        <h1>Oops</h1>
+        <p>Status: {error.status}</p>
+        <p>{error.data.message}</p>
+      </div>
+    );
+  }
+
+  let errorMessage = "Unknown error";
+  if (error instanceof Error) {
+    errorMessage = error.message;
+  }
+
+  return (
+    <div className="flex flex-col justify-center items-center">
+      <div className="flex flex-col justify-start w-1/2 gap-2 text-red-500">
+        <span className="font-semibold">Es ist ein Fehler aufgetreten: </span>
+        {errorMessage}
       </div>
     </div>
   );

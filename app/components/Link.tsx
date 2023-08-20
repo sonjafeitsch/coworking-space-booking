@@ -8,7 +8,7 @@ export function Link({
   return (
     <a
       href={href}
-      className="border-bg-primary border text-white w-full bg-bg-primary hover:border-bg-primary hover:text-bg-primary hover:bg-white focus:ring-4 font-medium rounded-3xl text-sm px-5 py-2.5 mr-2 mb-2 focus:ring-transparent focus:outline-none"
+      className="border-bg-primary border text-white w-full bg-bg-primary hover:border-bg-primary hover:text-bg-primary hover:bg-white focus:ring-4 font-medium rounded-3xl text-sm px-5 py-2.5 mr-2 mb-2 focus:ring-transparent focus:outline-none flex justify-center"
       {...otherProps}
     >
       {children}

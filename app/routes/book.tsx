@@ -1,5 +1,10 @@
 import { redirect, type ActionArgs, json } from "@remix-run/node";
-import { Form, useSearchParams } from "@remix-run/react";
+import {
+  Form,
+  isRouteErrorResponse,
+  useRouteError,
+  useSearchParams,
+} from "@remix-run/react";
 import dayjs from "dayjs";
 import invariant from "tiny-invariant";
 import { Button, TextField } from "~/components";
@@ -36,6 +41,10 @@ export const action = async ({ request }: ActionArgs) => {
   const user = await getUser(email);
   if (user.length > 0) {
     await createTicket(user[0].email, eventname, ticketBody);
+  } else {
+    throw new Error(
+      "Dieser Nutzer existiert noch nicht in unserem System. Bitte schreibe uns eine Nachricht an hallo@meine-nische.de"
+    );
   }
 
   return redirect("/finished");
@@ -52,8 +61,14 @@ export default function Submit() {
       <div className="flex flex-col justify-start w-1/2 gap-8">
         <div className="lg:max-w-lg">
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-themed-text font-serif sm:text-4xl">
-            Buchung bestätigen
+            Reservierung bestätigen
           </h1>
+          <p className="mt-6 text-base leading-6 text-themed-base-text">
+            Trage den Namen deiner Veranstaltung ein und hinterlasse optional
+            eine Nachricht an uns. Wichtig: diese Reservierung ist noch keine
+            finale Buchung. Wir bestätigen dir zeitnah deine Reservierung per
+            E-Mail.
+          </p>
         </div>
         <Form className="flex flex-col items-start gap-4" method="post">
           <input className="hidden" name="start" defaultValue={start} />
@@ -71,8 +86,36 @@ export default function Submit() {
             id="email"
             name="email"
           />
-          <Button type="submit">Buchen</Button>
+          <Button type="submit">Reservieren</Button>
         </Form>
+      </div>
+    </div>
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    return (
+      <div>
+        <h1>Oops</h1>
+        <p>Status: {error.status}</p>
+        <p>{error.data.message}</p>
+      </div>
+    );
+  }
+
+  let errorMessage = "Unknown error";
+  if (error instanceof Error) {
+    errorMessage = error.message;
+  }
+
+  return (
+    <div className="flex flex-col justify-center items-center">
+      <div className="flex flex-col justify-start w-1/2 gap-2 text-red-500">
+        <span className="font-semibold">Es ist ein Fehler aufgetreten: </span>
+        {errorMessage}
       </div>
     </div>
   );
