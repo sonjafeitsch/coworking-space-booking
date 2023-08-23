@@ -105,6 +105,7 @@ function handleBrowserRequest(
           const body = new PassThrough();
 
           responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set("Cache-Control", "no-store, must-revalidate");
 
           resolve(
             new Response(body, {
