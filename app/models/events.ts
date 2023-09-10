@@ -70,6 +70,8 @@ function getEventsFromResponse(rawData: string) {
 }
 
 export async function getEvents(start: string, end: string) {
+  console.log("start", start);
+  console.log("end", end);
   if (dayjs(start).isAfter(end)) {
     throw new Error("Der Beginn darf nicht hinter dem Ende liegen.");
   }
