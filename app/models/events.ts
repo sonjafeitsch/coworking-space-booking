@@ -70,7 +70,6 @@ function getEventsFromResponse(rawData: string) {
 }
 
 export async function getEvents(start: string, end: string) {
-  console.log("tz", process.env.TZ);
   if (dayjs(start).isAfter(end)) {
     throw new Error("Der Beginn darf nicht hinter dem Ende liegen.");
   }
@@ -116,8 +115,8 @@ export async function getEvents(start: string, end: string) {
 
 export async function createEvent(title: string, start: string, end: string) {
   const events = await getEvents(
-    dayjs(start).utc().format("YYYYMMDDTHHmmss"),
-    dayjs(end).utc().format("YYYYMMDDTHHmmss")
+    dayjs(start).format("YYYYMMDDTHHmmss"),
+    dayjs(end).format("YYYYMMDDTHHmmss")
   );
   if (events.length > 0) {
     throw new Error(
@@ -133,7 +132,7 @@ VERSION:2.0
 PRODID:-//Example Corp.//CalDAV Client//EN
 BEGIN:VEVENT
 UID:${uuid}
-DTSTAMP:${dayjs().utc().format("YYYYMMDDTHHmmss")}
+DTSTAMP:${dayjs().format("YYYYMMDDTHHmmss")}
 DTSTART;TZID=Europe/Berlin:${dayjs(start).format("YYYYMMDDTHHmmss")}
 DTEND;TZID=Europe/Berlin:${dayjs(end).format("YYYYMMDDTHHmmss")}
 SUMMARY:${title}
@@ -155,7 +154,6 @@ END:VCALENDAR
     body: xmlData,
   })
     .then((response) => {
-      console.log("Create event", response);
       return { message: "Event erstellt" };
     })
     .catch((error) => {
