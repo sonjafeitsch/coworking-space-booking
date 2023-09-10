@@ -62,7 +62,6 @@ export async function createTicket(
     }),
   })
     .then((response) => response.json())
-    .then((data) => console.log(data))
     .catch((error) => {
       throw new Error(error);
     });

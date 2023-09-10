@@ -28,6 +28,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     dayjs(start).utc().format("YYYYMMDDTHHmmss"),
     dayjs(end).utc().format("YYYYMMDDTHHmmss")
   );
+  console.log("events", events);
   return json({ events });
 };
 
