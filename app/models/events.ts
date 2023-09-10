@@ -153,6 +153,7 @@ END:VCALENDAR
     body: xmlData,
   })
     .then((response) => {
+      console.log("Create event", response);
       return { message: "Event erstellt" };
     })
     .catch((error) => {
