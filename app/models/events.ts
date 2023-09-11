@@ -104,7 +104,6 @@ export async function getEvents(start: string, end: string) {
   })
     .then((response) => response.text())
     .then((data) => {
-      console.log(data);
       return getEventsFromResponse(xml2json(data, { compact: true }));
     })
     .catch((error) => {
@@ -115,8 +114,8 @@ export async function getEvents(start: string, end: string) {
 
 export async function createEvent(title: string, start: string, end: string) {
   const events = await getEvents(
-    dayjs(start).format("YYYYMMDDTHHmmss"),
-    dayjs(end).format("YYYYMMDDTHHmmss")
+    dayjs(start).utcOffset(-120).format("YYYYMMDDTHHmmss"),
+    dayjs(end).utcOffset(-120).format("YYYYMMDDTHHmmss")
   );
   if (events.length > 0) {
     throw new Error(

@@ -21,13 +21,12 @@ export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
   const start = url.searchParams.get("start");
   const end = url.searchParams.get("end");
-  console.log("date on server", dayjs().format("YYYYMMDDTHHmmss"));
   if (!start || !end) {
     return json({ events: [] });
   }
   const events = await getEvents(
-    dayjs(start).format("YYYYMMDDTHHmmss"),
-    dayjs(end).format("YYYYMMDDTHHmmss")
+    dayjs(start).utcOffset(-120).format("YYYYMMDDTHHmmss"),
+    dayjs(end).utcOffset(-120).format("YYYYMMDDTHHmmss")
   );
   return json({ events });
 };
@@ -67,8 +66,6 @@ export default function Index() {
   const start = params.get("start") ?? "";
   const end = params.get("end") ?? "";
   const { state } = useNavigation();
-
-  console.log("date on client", dayjs().format("YYYYMMDDTHHmmss"));
 
   return (
     <div className="flex flex-col justify-start w-1/2 gap-8">
