@@ -21,17 +21,26 @@ export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
   const start = url.searchParams.get("start");
   const end = url.searchParams.get("end");
+  const timezone = parseInt(url.searchParams.get("timezone") || "");
   if (!start || !end) {
     return json({ events: [] });
   }
   const events = await getEvents(
-    dayjs(start).utcOffset(-120).format("YYYYMMDDTHHmmss"),
-    dayjs(end).utcOffset(-120).format("YYYYMMDDTHHmmss")
+    dayjs(start).utcOffset(timezone).format("YYYYMMDDTHHmmss"),
+    dayjs(end).utcOffset(timezone).format("YYYYMMDDTHHmmss")
   );
   return json({ events });
 };
 
-function Events({ start, end }: { start: string; end: string }) {
+function Events({
+  start,
+  end,
+  timezone,
+}: {
+  start: string;
+  end: string;
+  timezone: number;
+}) {
   const data = useLoaderData<typeof loader>();
 
   return data.events.length > 0 ? (
@@ -54,7 +63,9 @@ function Events({ start, end }: { start: string; end: string }) {
         Dein Wunschtermin ist verfügbar. Du kannst ihn jetzt in unserem
         Buchungskalender reservieren.
       </p>
-      <Link href={`/book?start=${start}&end=${end}`}>Jetzt reservieren</Link>
+      <Link href={`/book?start=${start}&end=${end}&timezone=${timezone}`}>
+        Jetzt reservieren
+      </Link>
     </div>
   ) : (
     <></>
@@ -66,6 +77,8 @@ export default function Index() {
   const start = params.get("start") ?? "";
   const end = params.get("end") ?? "";
   const { state } = useNavigation();
+
+  const timezoneOffset = new Date().getTimezoneOffset();
 
   return (
     <div className="flex flex-col justify-start w-1/2 gap-8">
@@ -94,6 +107,12 @@ export default function Index() {
             type="datetime-local"
             defaultValue={end}
           />
+          <input
+            type="hidden"
+            id="timezone"
+            name="timezone"
+            value={timezoneOffset.toString()}
+          />
         </div>
         <Button type="submit">
           {state === "loading"
@@ -101,7 +120,7 @@ export default function Index() {
             : "Verfügbarkeit prüfen"}
         </Button>
       </Form>
-      <Events start={start} end={end} />
+      <Events start={start} end={end} timezone={timezoneOffset} />
     </div>
   );
 }

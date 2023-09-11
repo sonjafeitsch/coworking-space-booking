@@ -70,6 +70,7 @@ function getEventsFromResponse(rawData: string) {
 }
 
 export async function getEvents(start: string, end: string) {
+  console.log(start, end);
   if (dayjs(start).isAfter(end)) {
     throw new Error("Der Beginn darf nicht hinter dem Ende liegen.");
   }
@@ -112,10 +113,16 @@ export async function getEvents(start: string, end: string) {
   return result;
 }
 
-export async function createEvent(title: string, start: string, end: string) {
+export async function createEvent(
+  title: string,
+  start: string,
+  end: string,
+  timezone: string
+) {
+  const parsedTimezone = parseInt(timezone);
   const events = await getEvents(
-    dayjs(start).utcOffset(-120).format("YYYYMMDDTHHmmss"),
-    dayjs(end).utcOffset(-120).format("YYYYMMDDTHHmmss")
+    dayjs(start).utcOffset(parsedTimezone).format("YYYYMMDDTHHmmss"),
+    dayjs(end).utcOffset(parsedTimezone).format("YYYYMMDDTHHmmss")
   );
   if (events.length > 0) {
     throw new Error(

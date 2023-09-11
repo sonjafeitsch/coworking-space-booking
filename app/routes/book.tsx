@@ -18,6 +18,7 @@ export const action = async ({ request }: ActionArgs) => {
   const message = formData.get("message");
   const start = formData.get("start");
   const end = formData.get("end");
+  const timezone = formData.get("timezone");
 
   const errors = {
     title: eventname ? null : "Bitte gib den Titel deiner Veranstaltung ein.",
@@ -33,6 +34,7 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof end === "string", "Enddatum muss ein Text sein.");
   invariant(typeof email === "string", "Email muss ein Text sein.");
   invariant(typeof message === "string", "Message muss ein Text sein.");
+  invariant(typeof timezone === "string", "Timezone muss ein Text sein.");
 
   let ticketBody =
     "Buchung für " +
@@ -46,7 +48,7 @@ export const action = async ({ request }: ActionArgs) => {
   const user = await getUser(email);
   if (user.length > 0) {
     Promise.all([
-      await createEvent(eventname, start, end),
+      await createEvent(eventname, start, end, timezone),
       await createTicket(user[0].email, eventname, ticketBody),
     ]);
   } else {
@@ -60,9 +62,10 @@ export const action = async ({ request }: ActionArgs) => {
 
 export default function Submit() {
   const [params] = useSearchParams();
-  const start = params.get("start") ?? "";
-  const end = params.get("end") ?? "";
-  const event = params.get("eventname") ?? "";
+  const start = params.get("start") || "";
+  const end = params.get("end") || "";
+  const timezone = params.get("timezone") || "";
+  const event = params.get("eventname") || "";
 
   return (
     <div className="flex flex-col justify-start w-1/2 gap-8">
@@ -77,8 +80,9 @@ export default function Submit() {
         </p>
       </div>
       <Form className="flex flex-col items-start gap-4" method="post">
-        <input className="hidden" name="start" defaultValue={start} />
-        <input className="hidden" name="end" defaultValue={end} />
+        <input type="hidden" name="start" defaultValue={start} />
+        <input type="hidden" name="end" defaultValue={end} />
+        <input type="hidden" name="timezone" defaultValue={timezone} />
         <TextField
           className="w-full"
           label="Name der Veranstaltung *"
