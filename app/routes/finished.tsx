@@ -1,7 +1,7 @@
 export default function Finished() {
   return (
-    <div className="flex flex-col justify-center items-center">
-      <div className="flex flex-col justify-start w-1/2 gap-4">
+    <div className="flex flex-col justify-start w-full p-16 sm:p-0 sm:w-1/2 gap-8">
+      <div className="flex flex-col justify-start lg:max-w-lg gap-4">
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-themed-text font-serif sm:text-4xl">
           Danke für deine Reservierung
         </h1>

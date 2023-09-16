@@ -44,11 +44,11 @@ function Events({
   const data = useLoaderData<typeof loader>();
 
   return data.events.length > 0 ? (
-    <>
+    <div>
       <div className="font-semibold">
         Leider belegt. Folgende parallele Veranstaltungen wurden gefunden:
       </div>
-      <ul>
+      <ul className="list-disc mt-2">
         {data.events.map((event, i) => (
           <li key={i}>
             {dayjs(event.start).format("LLL")} – {dayjs(event.end).format("LT")}
@@ -56,7 +56,7 @@ function Events({
           </li>
         ))}
       </ul>
-    </>
+    </div>
   ) : start && end ? (
     <div className="flex flex-col gap-4 content-start">
       <p className="text-base leading-6 text-themed-base-text">
@@ -81,7 +81,7 @@ export default function Index() {
   const timezoneOffset = new Date().getTimezoneOffset();
 
   return (
-    <div className="flex flex-col justify-start w-1/2 gap-8">
+    <div className="flex flex-col justify-start w-full p-16 sm:p-0 sm:w-1/2 gap-8">
       <div className="lg:max-w-lg">
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-themed-text font-serif sm:text-4xl">
           Meine Buchung
@@ -92,8 +92,9 @@ export default function Index() {
         </p>
       </div>
       <Form className="flex flex-col items-start gap-4">
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 w-full">
           <TextField
+            className="flex-grow"
             label="Von"
             id="start"
             name="start"
@@ -101,6 +102,7 @@ export default function Index() {
             defaultValue={start}
           />
           <TextField
+            className="flex-grow"
             label="Bis"
             id="end"
             name="end"

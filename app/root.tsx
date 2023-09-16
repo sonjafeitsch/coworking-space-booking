@@ -26,7 +26,7 @@ export default function App() {
         <Links />
       </head>
       <body className="h-screen bg-meine-nische-background font-sans text-themed-base-text">
-        <div className="min-h-screen grid grid-cols-2">
+        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
           <img
             alt="cover"
             src={image}

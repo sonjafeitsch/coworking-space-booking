@@ -68,15 +68,19 @@ export default function Submit() {
   const event = params.get("eventname") || "";
 
   return (
-    <div className="flex flex-col justify-start w-1/2 gap-8">
-      <div className="lg:max-w-lg">
+    <div className="flex flex-col justify-start w-full p-16 sm:p-0 sm:w-1/2 gap-8">
+      <div className="flex flex-col justify-start lg:max-w-lg gap-4">
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-themed-text font-serif sm:text-4xl">
           Reservierung bestätigen
         </h1>
         <p className="mt-6 text-base leading-6 text-themed-base-text">
           Trage den Namen deiner Veranstaltung ein und hinterlasse optional eine
-          Nachricht an uns. Wichtig: diese Reservierung ist noch keine finale
-          Buchung. Wir bestätigen dir zeitnah deine Reservierung per E-Mail.
+          Nachricht an uns.
+        </p>
+        <p className="text-base leading-6 text-themed-base-text">
+          <span className="font-semibold">Wichtig:</span> diese Reservierung ist
+          noch keine finale Buchung. Wir bestätigen dir zeitnah deine
+          Reservierung per E-Mail.
         </p>
       </div>
       <Form className="flex flex-col items-start gap-4" method="post">
