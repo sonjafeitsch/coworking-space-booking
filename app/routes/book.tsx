@@ -2,6 +2,7 @@ import { redirect, type ActionArgs, json } from "@remix-run/node";
 import {
   Form,
   isRouteErrorResponse,
+  useNavigation,
   useRouteError,
   useSearchParams,
 } from "@remix-run/react";
@@ -37,13 +38,20 @@ export const action = async ({ request }: ActionArgs) => {
   invariant(typeof timezone === "string", "Timezone muss ein Text sein.");
 
   let ticketBody =
-    "Buchung für " +
+    "Vielen Dank für Deine Anfrage. Wir bestätigen dir zeitnah Deine Reservierung per E-Mail.\n\n" +
+    "Deine Anfrage: " +
     dayjs(start).format("LLL") +
     " – " +
     dayjs(end).format("LLL");
   if (message) {
-    ticketBody += "\n-------------\n" + message;
+    ticketBody += "\n\nDeine Nachricht: " + message;
   }
+
+  ticketBody +=
+    "\n\nWenn Du Fragen zu Deine Anfrage hast, schreibe uns einfach eine E-Mail an hallo@meine-nische.de";
+
+  ticketBody +=
+    "\n\nSonja und Fabian Feitsch\nMeine Nische Würzburg\n\nDatenschutz:\nhttps://meine-nische.de/kontakt#datenschutz\nImpressum:\nhttps://meine-nische.de/kontakt#impressum";
 
   const user = await getUser(email);
   if (user.length > 0) {
@@ -66,6 +74,8 @@ export default function Submit() {
   const end = params.get("end") || "";
   const timezone = params.get("timezone") || "";
   const event = params.get("eventname") || "";
+
+  const { state } = useNavigation();
 
   return (
     <div className="flex flex-col justify-start w-full p-16 sm:p-0 sm:w-1/2 gap-8">
@@ -106,7 +116,9 @@ export default function Submit() {
           id="message"
           name="message"
         />
-        <Button type="submit">Reservieren</Button>
+        <Button type="submit">
+          {state === "loading" ? "Wird reserviert…" : "Reservierung"}
+        </Button>
       </Form>
     </div>
   );
