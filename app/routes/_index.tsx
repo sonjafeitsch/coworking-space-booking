@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import utc from "dayjs/plugin/utc";
 import { Button, Link, TextField } from "~/components";
+import { SecondaryLink } from "~/components/Link";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(utc);
@@ -66,6 +67,7 @@ function Events({
       <Link href={`/book?start=${start}&end=${end}&timezone=${timezone}`}>
         Jetzt reservieren
       </Link>
+      <SecondaryLink href="/">Zurück</SecondaryLink>
     </div>
   ) : (
     <></>
@@ -76,7 +78,8 @@ export default function Index() {
   const [params] = useSearchParams();
   const start = params.get("start") ?? "";
   const end = params.get("end") ?? "";
-  const { state } = useNavigation();
+  const navigation = useNavigation();
+  const state = navigation.state;
 
   const timezoneOffset = new Date().getTimezoneOffset();
 
@@ -99,6 +102,7 @@ export default function Index() {
             id="start"
             name="start"
             type="datetime-local"
+            disabled={start.length > 0}
             defaultValue={start}
           />
           <TextField
@@ -107,6 +111,7 @@ export default function Index() {
             id="end"
             name="end"
             type="datetime-local"
+            disabled={end.length > 0}
             defaultValue={end}
           />
           <input
@@ -116,11 +121,13 @@ export default function Index() {
             value={timezoneOffset.toString()}
           />
         </div>
-        <Button type="submit">
-          {state === "loading"
-            ? "Events werden gesucht…"
-            : "Verfügbarkeit prüfen"}
-        </Button>
+        {start.length < 1 && end.length < 1 && (
+          <Button type="submit">
+            {state === "loading"
+              ? "Events werden gesucht…"
+              : "Verfügbarkeit prüfen"}
+          </Button>
+        )}
       </Form>
       <Events start={start} end={end} timezone={timezoneOffset} />
     </div>
