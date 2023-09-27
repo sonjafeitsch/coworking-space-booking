@@ -9,6 +9,7 @@ import {
 import dayjs from "dayjs";
 import invariant from "tiny-invariant";
 import { Button, TextArea, TextField } from "~/components";
+import { ErrorAlert } from "~/components/ErrorAlert";
 import { createEvent } from "~/models/events";
 import { createTicket, getUser } from "~/models/zammad";
 
@@ -68,7 +69,7 @@ export const action = async ({ request }: ActionArgs) => {
   return redirect("/finished");
 };
 
-export default function Submit() {
+export default function SubmitEventForm({ error }: { error?: string }) {
   const [params] = useSearchParams();
   const start = params.get("start") || "";
   const end = params.get("end") || "";
@@ -93,6 +94,7 @@ export default function Submit() {
           Reservierung per E-Mail.
         </p>
       </div>
+      {error && <ErrorAlert error={error} />}
       <Form className="flex flex-col items-start gap-4" method="post">
         <input type="hidden" name="start" defaultValue={start} />
         <input type="hidden" name="end" defaultValue={end} />
@@ -142,10 +144,5 @@ export function ErrorBoundary() {
     errorMessage = error.message;
   }
 
-  return (
-    <div className="flex flex-col justify-start w-1/2 gap-2 text-red-500">
-      <span className="font-semibold">Es ist ein Fehler aufgetreten: </span>
-      {errorMessage}
-    </div>
-  );
+  return <SubmitEventForm error={errorMessage} />;
 }
