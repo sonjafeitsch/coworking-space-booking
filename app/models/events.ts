@@ -3,6 +3,7 @@ import { xml2json } from "xml-js";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import utc from "dayjs/plugin/utc";
 import { v4 as uuidv4 } from "uuid";
+import { Response } from "@remix-run/node";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(utc);
@@ -32,7 +33,7 @@ function getEventsFromResponse(rawData: string) {
 
   if (jsonRawData["d:error"]) {
     const errorMessage = jsonRawData["d:error"]["s:message"]["_text"];
-    throw new Error(errorMessage);
+    throw new Response(errorMessage, { status: 500 });
   }
 
   const response = jsonRawData["d:multistatus"]["d:response"];
@@ -72,7 +73,9 @@ function getEventsFromResponse(rawData: string) {
 export async function getEvents(start: string, end: string) {
   console.log(start, end);
   if (dayjs(start).isAfter(end)) {
-    throw new Error("Der Beginn darf nicht hinter dem Ende liegen.");
+    throw new Response("Der Beginn darf nicht hinter dem Ende liegen.", {
+      status: 500,
+    });
   }
 
   const xmlData = `<?xml version="1.0" encoding="utf-8" ?>
@@ -108,7 +111,7 @@ export async function getEvents(start: string, end: string) {
       return getEventsFromResponse(xml2json(data, { compact: true }));
     })
     .catch((error) => {
-      throw new Error(error);
+      throw new Response(error, { status: 500 });
     });
   return result;
 }
@@ -125,8 +128,9 @@ export async function createEvent(
     dayjs(end).utcOffset(parsedTimezone).format("YYYYMMDDTHHmmss")
   );
   if (events.length > 0) {
-    throw new Error(
-      "Event konnte nicht angelegt werden, da schon ein anderes Event existiert."
+    throw new Response(
+      "Event konnte nicht angelegt werden, da schon ein anderes Event existiert.",
+      { status: 500 }
     );
   }
 
@@ -163,7 +167,7 @@ END:VCALENDAR
       return { message: "Event erstellt" };
     })
     .catch((error) => {
-      throw new Error(error);
+      throw new Response(error, { status: 500 });
     });
   return result;
 }

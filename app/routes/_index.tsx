@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import utc from "dayjs/plugin/utc";
 import { Button, Link, TextField } from "~/components";
+import { ErrorAlert } from "~/components/ErrorAlert";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(utc);
@@ -72,7 +73,7 @@ function Events({
   );
 }
 
-export default function Index() {
+function CheckDateForm({ error }: { error?: string }) {
   const [params] = useSearchParams();
   const start = params.get("start") ?? "";
   const end = params.get("end") ?? "";
@@ -91,6 +92,7 @@ export default function Index() {
           Klick ob sie verfügbar ist.
         </p>
       </div>
+      {error && <ErrorAlert error={error} />}
       <Form className="flex flex-col items-start gap-4">
         <div className="flex flex-col sm:flex-row gap-4 w-full">
           <TextField
@@ -122,33 +124,23 @@ export default function Index() {
             : "Verfügbarkeit prüfen"}
         </Button>
       </Form>
-      <Events start={start} end={end} timezone={timezoneOffset} />
+      {!error && <Events start={start} end={end} timezone={timezoneOffset} />}
     </div>
   );
+}
+
+export default function Index() {
+  return <CheckDateForm />;
 }
 
 export function ErrorBoundary() {
   const error = useRouteError();
 
+  let errorMessage =
+    "Ein unbekannter Fehler ist aufgetreten. Bitte lade die Seite einfach neu und probiere es erneut.";
   if (isRouteErrorResponse(error)) {
-    return (
-      <div>
-        <h1>Oops</h1>
-        <p>Status: {error.status}</p>
-        <p>{error.data.message}</p>
-      </div>
-    );
+    errorMessage = error.data;
   }
 
-  let errorMessage = "Unknown error";
-  if (error instanceof Error) {
-    errorMessage = error.message;
-  }
-
-  return (
-    <div className="flex flex-col justify-start w-1/2 gap-2 text-red-500">
-      <span className="font-semibold">Es ist ein Fehler aufgetreten: </span>
-      {errorMessage}
-    </div>
-  );
+  return <CheckDateForm error={errorMessage} />;
 }
