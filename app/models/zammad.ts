@@ -20,8 +20,9 @@ export async function getUser(email: string): Promise<User[]> {
         return [];
       }
       if (data.length > 1) {
-        throw new Error(
-          "Dieser User existiert zweimal. Bitte kontaktiere den Support."
+        throw new Response(
+          "Dieser User existiert zweimal. Bitte kontaktiere den Support.",
+          { status: 500 }
         );
       }
       return data.map((user: any) => {
@@ -32,7 +33,7 @@ export async function getUser(email: string): Promise<User[]> {
       });
     })
     .catch((error) => {
-      throw new Error(error);
+      throw new Response(error, { status: 500 });
     });
   return result;
 }
@@ -63,6 +64,6 @@ export async function createTicket(
   })
     .then((response) => response.json())
     .catch((error) => {
-      throw new Error(error);
+      throw new Response(error, { status: 500 });
     });
 }

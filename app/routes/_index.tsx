@@ -136,19 +136,10 @@ export default function Index() {
 export function ErrorBoundary() {
   const error = useRouteError();
 
+  let errorMessage =
+    "Ein unbekannter Fehler ist aufgetreten. Bitte lade die Seite einfach neu und probiere es erneut.";
   if (isRouteErrorResponse(error)) {
-    return (
-      <div>
-        <h1>Oops</h1>
-        <p>Status: {error.status}</p>
-        <p>{error.data.message}</p>
-      </div>
-    );
-  }
-
-  let errorMessage = "Unknown error";
-  if (error instanceof Error) {
-    errorMessage = error.message;
+    errorMessage = error.data;
   }
 
   return <CheckDateForm error={errorMessage} />;
