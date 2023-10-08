@@ -47,15 +47,17 @@ function Events({
   return data.events.length > 0 ? (
     <div>
       <div className="font-semibold">
-        Leider belegt. Folgende parallele Veranstaltungen wurden gefunden:
+        Leider ist der Raum zu folgenden Zeiten bereits belegt:
       </div>
       <ul className="list-disc mt-2">
-        {data.events.map((event, i) => (
-          <li key={i}>
-            {dayjs(event.start).format("LLL")} – {dayjs(event.end).format("LT")}
-            : {event.summary}
-          </li>
-        ))}
+        {data.events.map((event, i) => {
+          return (
+            <li key={i}>
+              {dayjs(event.start).format("HH:mm")} –{" "}
+              {dayjs(event.end).format("HH:mm")} Uhr
+            </li>
+          );
+        })}
       </ul>
     </div>
   ) : start && end ? (
