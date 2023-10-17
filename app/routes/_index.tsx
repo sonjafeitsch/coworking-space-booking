@@ -1,56 +1,64 @@
-import { LoaderArgs, json } from "@remix-run/node";
+import { ActionArgs, json } from "@remix-run/node";
 import {
   Form,
   isRouteErrorResponse,
-  useLoaderData,
+  useActionData,
   useNavigation,
   useRouteError,
-  useSearchParams,
 } from "@remix-run/react";
-import { getEvents } from "~/models/events";
+import { Event, getEvents } from "~/models/events";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import utc from "dayjs/plugin/utc";
 import { Button, Link, TextField } from "~/components";
 import { ErrorAlert } from "~/components/ErrorAlert";
+import invariant from "tiny-invariant";
 
 dayjs.extend(localizedFormat);
 dayjs.extend(utc);
 dayjs.locale("de");
 
-export const loader = async ({ request }: LoaderArgs) => {
-  const url = new URL(request.url);
-  const start = url.searchParams.get("start");
-  const end = url.searchParams.get("end");
-  const timezone = parseInt(url.searchParams.get("timezone") || "");
-  if (!start || !end) {
+export async function action({ request }: ActionArgs) {
+  const formData = await request.formData();
+  const start = formData.get("start");
+  const end = formData.get("end");
+  const timezone = formData.get("timezone");
+
+  if (!start || !end || !timezone) {
     return json({ events: [] });
   }
-  const events = await getEvents(
-    dayjs(start).utcOffset(timezone).format("YYYYMMDDTHHmmss"),
-    dayjs(end).utcOffset(timezone).format("YYYYMMDDTHHmmss")
-  );
-  return json({ events });
-};
+
+  invariant(typeof start === "string", "Startdatum muss ein Text sein.");
+  invariant(typeof end === "string", "Enddatum muss ein Text sein.");
+  invariant(typeof timezone === "string", "");
+
+  const startFormatted = dayjs(start)
+    .utcOffset(parseInt(timezone))
+    .format("YYYYMMDDTHHmmss");
+  const endFormatted = dayjs(end)
+    .utcOffset(parseInt(timezone))
+    .format("YYYYMMDDTHHmmss");
+
+  const events = await getEvents(startFormatted, endFormatted);
+  return json({ events, formData: { start, end, timezone } });
+}
 
 function Events({
-  start,
-  end,
-  timezone,
+  events,
+  formData,
 }: {
-  start: string;
-  end: string;
-  timezone: number;
+  events: Event[];
+  formData: { start: string; end: string; timezone: number };
 }) {
-  const data = useLoaderData<typeof loader>();
+  const { start, end, timezone } = formData;
 
-  return data.events.length > 0 ? (
+  return events.length > 0 ? (
     <div>
       <div className="font-semibold">
         Leider ist der Raum zu folgenden Zeiten bereits belegt:
       </div>
       <ul className="list-disc mt-2">
-        {data.events.map((event, i) => {
+        {events.map((event, i) => {
           return (
             <li key={i}>
               {dayjs(event.start).format("HH:mm")} –{" "}
@@ -60,26 +68,24 @@ function Events({
         })}
       </ul>
     </div>
-  ) : start && end ? (
-    <div className="flex flex-col gap-4 content-start">
-      <p className="text-base leading-6 text-themed-base-text">
-        Dein Wunschtermin ist verfügbar. Du kannst ihn jetzt in unserem
-        Buchungskalender reservieren.
-      </p>
-      <Link href={`/book?start=${start}&end=${end}&timezone=${timezone}`}>
-        Jetzt reservieren
-      </Link>
-    </div>
   ) : (
-    <></>
+    start && end && (
+      <div className="flex flex-col gap-4 content-start">
+        <p className="text-base leading-6 text-themed-base-text">
+          Dein Wunschtermin ist verfügbar. Du kannst ihn jetzt in unserem
+          Buchungskalender reservieren.
+        </p>
+        <Link href={`/book?start=${start}&end=${end}&timezone=${timezone}`}>
+          Jetzt reservieren
+        </Link>
+      </div>
+    )
   );
 }
 
 function CheckDateForm({ error }: { error?: string }) {
-  const [params] = useSearchParams();
-  const start = params.get("start") ?? "";
-  const end = params.get("end") ?? "";
   const { state } = useNavigation();
+  const actionData = useActionData<typeof action>();
 
   const timezoneOffset = new Date().getTimezoneOffset();
 
@@ -95,7 +101,7 @@ function CheckDateForm({ error }: { error?: string }) {
         </p>
       </div>
       {error && <ErrorAlert error={error} />}
-      <Form className="flex flex-col items-start gap-4">
+      <Form className="flex flex-col items-start gap-4" method="post">
         <div className="flex flex-col sm:flex-row gap-4 w-full">
           <TextField
             className="flex-grow"
@@ -103,7 +109,6 @@ function CheckDateForm({ error }: { error?: string }) {
             id="start"
             name="start"
             type="datetime-local"
-            defaultValue={start}
           />
           <TextField
             className="flex-grow"
@@ -111,7 +116,6 @@ function CheckDateForm({ error }: { error?: string }) {
             id="end"
             name="end"
             type="datetime-local"
-            defaultValue={end}
           />
           <input
             type="hidden"
@@ -121,12 +125,14 @@ function CheckDateForm({ error }: { error?: string }) {
           />
         </div>
         <Button type="submit">
-          {state === "loading"
+          {state === "submitting"
             ? "Events werden gesucht…"
             : "Verfügbarkeit prüfen"}
         </Button>
       </Form>
-      {!error && <Events start={start} end={end} timezone={timezoneOffset} />}
+      {!error && actionData?.events && actionData?.formData && (
+        <Events formData={actionData.formData} events={actionData.events} />
+      )}
     </div>
   );
 }

@@ -9,7 +9,7 @@ dayjs.extend(localizedFormat);
 dayjs.extend(utc);
 dayjs.locale("de");
 
-type Event = {
+export type Event = {
   start: string;
   end: string;
   summary: string;
@@ -71,7 +71,6 @@ function getEventsFromResponse(rawData: string) {
 }
 
 export async function getEvents(start: string, end: string) {
-  console.log(start, end);
   if (dayjs(start).isAfter(end)) {
     throw new Response("Der Beginn darf nicht hinter dem Ende liegen.", {
       status: 500,
