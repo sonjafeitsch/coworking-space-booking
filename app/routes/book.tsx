@@ -120,7 +120,7 @@ export default function SubmitEventForm({ error }: { error?: string }) {
           name="message"
         />
         <Button type="submit">
-          {state === "loading" ? "Wird reserviert…" : "Reservierung"}
+          {state === "submitting" ? "Wird reserviert…" : "Reservierung"}
         </Button>
       </Form>
     </div>
