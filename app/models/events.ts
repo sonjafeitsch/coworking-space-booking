@@ -9,7 +9,7 @@ dayjs.extend(localizedFormat);
 dayjs.extend(utc);
 dayjs.locale("de");
 
-type Event = {
+export type Event = {
   start: string;
   end: string;
   summary: string;
@@ -71,13 +71,6 @@ function getEventsFromResponse(rawData: string) {
 }
 
 export async function getEvents(start: string, end: string) {
-  console.log(start, end);
-  if (dayjs(start).isAfter(end)) {
-    throw new Response("Der Beginn darf nicht hinter dem Ende liegen.", {
-      status: 500,
-    });
-  }
-
   const xmlData = `<?xml version="1.0" encoding="utf-8" ?>
     <C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
       <D:prop>
@@ -93,49 +86,60 @@ export async function getEvents(start: string, end: string) {
       </C:filter>
     </C:calendar-query>`;
 
-  const result = await fetch(process.env.CALENDAR_URL ?? "", {
-    method: "REPORT",
-    headers: {
-      "Content-Type": "text/calendar; charset=utf-8",
-      Depth: "1",
-      Authorization:
-        "Basic " +
-        btoa(
-          `${process.env.CALENDAR_USERNAME}:${process.env.CALENDAR_PASSWORD}`
-        ),
-    },
-    body: xmlData,
-  })
-    .then((response) => response.text())
-    .then((data) => {
-      return getEventsFromResponse(xml2json(data, { compact: true }));
-    })
-    .catch((error) => {
-      throw new Response(error, { status: 500 });
+  let events: Event[] = [];
+
+  try {
+    const result = await fetch(process.env.CALENDAR_URL ?? "", {
+      method: "REPORT",
+      headers: {
+        "Content-Type": "text/calendar; charset=utf-8",
+        Depth: "1",
+        Authorization:
+          "Basic " +
+          btoa(
+            `${process.env.CALENDAR_USERNAME}:${process.env.CALENDAR_PASSWORD}`
+          ),
+      },
+      body: xmlData,
     });
-  return result;
+    const rawData = await result.text();
+    events = getEventsFromResponse(xml2json(rawData, { compact: true }));
+  } catch (error) {
+    console.error(error);
+    throw new Response("Es kam zu einem API-Fehler", { status: 500 });
+  }
+
+  return events;
 }
 
 export async function createEvent(
   title: string,
   start: string,
   end: string,
-  timezone: string
+  timezone: string,
+  ticketNumber: string
 ) {
   const parsedTimezone = parseInt(timezone);
-  const events = await getEvents(
-    dayjs(start).utcOffset(parsedTimezone).format("YYYYMMDDTHHmmss"),
-    dayjs(end).utcOffset(parsedTimezone).format("YYYYMMDDTHHmmss")
-  );
+  let events: Event[] = [];
+
+  try {
+    events = await getEvents(
+      dayjs(start).utcOffset(parsedTimezone).format("YYYYMMDDTHHmmss"),
+      dayjs(end).utcOffset(parsedTimezone).format("YYYYMMDDTHHmmss")
+    );
+  } catch (error) {
+    console.error(error);
+    throw new Response("Es kam zu einem API-Fehler", { status: 500 });
+  }
+
   if (events.length > 0) {
     throw new Response(
       "Event konnte nicht angelegt werden, da schon ein anderes Event existiert.",
-      { status: 500 }
+      { status: 400 }
     );
   }
 
   const uuid = uuidv4();
-
   const xmlData = `
 BEGIN:VCALENDAR
 VERSION:2.0
@@ -145,29 +149,27 @@ UID:${uuid}
 DTSTAMP:${dayjs().format("YYYYMMDDTHHmmss")}
 DTSTART;TZID=Europe/Berlin:${dayjs(start).format("YYYYMMDDTHHmmss")}
 DTEND;TZID=Europe/Berlin:${dayjs(end).format("YYYYMMDDTHHmmss")}
-SUMMARY:${title}
+SUMMARY:${"BLOCKER #" + ticketNumber + ": " + title}
 END:VEVENT
 END:VCALENDAR
  `;
 
-  const result = await fetch(process.env.CALENDAR_URL + `${uuid}.ics` ?? "", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "text/calendar; charset=utf-8",
-      Expect: "",
-      Authorization:
-        "Basic " +
-        btoa(
-          `${process.env.CALENDAR_USERNAME}:${process.env.CALENDAR_PASSWORD}`
-        ),
-    },
-    body: xmlData,
-  })
-    .then((response) => {
-      return { message: "Event erstellt" };
-    })
-    .catch((error) => {
-      throw new Response(error, { status: 500 });
+  try {
+    await fetch(process.env.CALENDAR_URL + `${uuid}.ics` ?? "", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "text/calendar; charset=utf-8",
+        Expect: "",
+        Authorization:
+          "Basic " +
+          btoa(
+            `${process.env.CALENDAR_USERNAME}:${process.env.CALENDAR_PASSWORD}`
+          ),
+      },
+      body: xmlData,
     });
-  return result;
+  } catch (error) {
+    console.error(error);
+    throw new Response("Es kam zu einem API-Fehler", { status: 500 });
+  }
 }
