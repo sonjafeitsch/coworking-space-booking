@@ -1,6 +1,6 @@
-# meine-nische-booking
+# coworking-space-booking
 
-*meine-nische-booking* is a Remix application for managing bookings for my coworking space [Meine Nische](https://github.com/sonjafeitsch/meine-nische-website) in Würzburg/Germany.
+*coworking-space-booking* is a Remix application for managing bookings for my coworking space [Meine Nische](https://github.com/sonjafeitsch/meine-nische-website) in Würzburg/Germany.
 
 ## License
 See LICENSE file.
